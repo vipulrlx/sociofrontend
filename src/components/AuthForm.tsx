@@ -4,6 +4,7 @@ import { Phone, Lock, Mail, KeyRound, User } from "lucide-react";
 import { useState } from "react";
 import API from "@/lib/axios"; // axios instance
 import GoogleLoginButton from "./googleAuthBtn/GoogleLoginButton";
+import ForgotPasswordForm from "./forgotPassword/ForgotPasswordForm";
 
 const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || "Default Brand";
 const brandLogo = process.env.NEXT_PUBLIC_BRAND_LOGO || "/next.svg";
@@ -363,6 +364,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
               {loading ? "Loading..." : isLogin ? "Sign in" : "Sign up"}
             </button>
           )}
+          {/* <ForgotPasswordForm/> */}
         </div>
 
         {/* Divider */}

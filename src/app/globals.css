@@ -87,16 +87,16 @@
   --input-height: var(--input-height-sm);
   --input-fz: var(--mantine-font-size-sm);
 
-  --color-primary: #598af3;
-  --color-success: #10B981;
+  --color-primary: #000000;
+  --color-success: #101010;
   --color-purple: #8f44d1;
   --color-warning: #F59E0B;
   --color-error: #EF4444;
   --color-text-primary: #1F2937;
   --color-text-secondary: #6B7280;
   --color-border: #E5E7EB;
-  --color-success-opacity: #a8f9e0a5;
-  --color-info-opacity: rgb(33 150 243 / 21%);
+  --color-success-opacity: #0000001a;
+  --color-info-opacity: #00000014;
   --color-purple-opacity: #e566f626;
   --color-gray-opacity: #bfbfbf36;
   --dashboard-bg-content-area: #f0f0f0;

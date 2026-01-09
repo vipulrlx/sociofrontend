@@ -14,14 +14,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   if (isAuthPage) {
     return <>
-        {/* Google Identity Services script */}
-        <Script 
-          src="https://accounts.google.com/gsi/client" 
-          async 
-          defer 
-          strategy="afterInteractive" 
-        />
-        {children}
+      {children}
     </>;
   }
 
@@ -30,7 +23,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
       {/* Sidebar */}
       <Sidebar />
       {/* Main content area */}
-      <div className="flex-1 flex flex-col bg-main-content ">
+      <div className="flex-1 flex flex-col bg-white min-w-0 overflow-x-hidden">
         <Header />
         <main className="flex-1 overflow-y-auto px-6">{children}</main>
       </div>

@@ -1,5 +1,6 @@
 import "./globals.css";
 import LayoutWrapper from "@/components/layout-wrapper";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export const metadata = {
   title: "Ocoya Dashboard",
@@ -10,7 +11,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="bg-gray-50 text-gray-900">
-        <LayoutWrapper>{children}</LayoutWrapper>
+        {/* Protect everything except login/signup */}
+        <ProtectedRoute>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </ProtectedRoute>
       </body>
     </html>
   );

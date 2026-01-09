@@ -17,7 +17,7 @@ export default function Header() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  // ✅ Guarded effect: runs only in browser
+  // Guarded effect: runs only in browser
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -69,7 +69,7 @@ export default function Header() {
           {open && (
             <div className="absolute overflow-hidden right-0 mt-2 w-60 bg-white rounded-sm shadow-lg border z-50">
               {/* Top user info */}
-              <div className="flex items-center bg-blue-900 gap-3 px-4 py-3 border-b">
+              <div className="flex items-center bg-neutral-900 gap-3 px-4 py-3 border-b">
                 <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
                   <User size={20} />
                 </div>

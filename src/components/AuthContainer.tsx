@@ -9,7 +9,7 @@ export default function AuthContainer() {
 
   return (
     <div className="min-h-screen flex">
-      <div className={`flex flex-col util-bg-dots items-center justify-center p-4 ${isLogin ? 'w-full' : 'w-full md:w-1/2'}`}>
+      <div className={`flex flex-col items-center justify-center p-4 ${isLogin ? 'w-full' : 'w-full md:w-1/2'}`}>
         <div className="w-full sm:max-w-sm mx-10 bg-white overflow-hidden ocaya">
           <AuthForm isLogin={isLogin} setIsLogin={setIsLogin} />
         </div>
