@@ -1,5 +1,5 @@
-import BusinessProfile from "@/components/business/BusinessProfile";
+import BusinessManager from "@/components/business/BusinessManager";
 
 export default function BusinessPage() {
-    return <BusinessProfile />;
+    return <BusinessManager />;
 }

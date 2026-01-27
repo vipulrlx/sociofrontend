@@ -9,10 +9,15 @@ import {
   LogOut,
   HelpCircle,
   DollarSign,
+  Menu,
 } from "lucide-react";
 import API from "@/lib/axios";
 
-export default function Header() {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+export default function Header({ onToggleSidebar }: HeaderProps) {
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -46,14 +51,22 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-12 relative">
-      <h1 className="text-lg font-semibold">Dashboard</h1>
-
+    <header className="h-16 flex items-center justify-between px-4 md:px-12 relative bg-white border-b border-gray-100 md:border-none">
       <div className="flex items-center gap-4">
+        <button
+          onClick={onToggleSidebar}
+          className="p-2 -ml-2 rounded-lg hover:bg-gray-100 md:hidden"
+        >
+          <Menu size={20} />
+        </button>
+        <h1 className="text-lg font-semibold">Dashboard</h1>
+      </div>
+
+      <div className="flex items-center gap-2 md:gap-4">
         <button className="p-2 rounded-full hover:cursor-pointer hover:bg-gray-100">
           <Bell size={20} />
         </button>
-        <button className="p-2 rounded-full hover:cursor-pointer hover:bg-gray-100">
+        <button className="hidden md:block p-2 rounded-full hover:cursor-pointer hover:bg-gray-100">
           <Settings size={20} />
         </button>
 

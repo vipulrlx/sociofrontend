@@ -11,10 +11,15 @@ declare global {
 export default function GoogleLoginButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [client, setClient] = useState<any>(null);
 
   useEffect(() => {
     const loadGoogleScript = () => {
+      // If script is already loaded, try to initialize/render if possible
+      if (typeof window !== 'undefined' && window.google?.accounts?.id && document.getElementById("google-client-script")) {
+        initializeGoogle();
+        return;
+      }
+
       if (document.getElementById("google-client-script")) return;
 
       const script = document.createElement("script");
@@ -23,102 +28,101 @@ export default function GoogleLoginButton() {
       script.defer = true;
       script.id = "google-client-script";
       script.onload = () => {
-        if (window.google) {
-          try {
-            if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-              console.error("Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID");
-              setError("Google Client ID is missing in environment variables.");
-              return;
-            }
-
-            // Initialize OAuth2 client (popup flow, not one-tap)
-            const oauthClient = window.google.accounts.oauth2.initTokenClient({
-              client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-              scope: "email profile openid",
-              callback: async (tokenResponse: any) => {
-                if (!tokenResponse || !tokenResponse.access_token) {
-                  setError("No token returned");
-                  return;
-                }
-
-                console.log("Google Access Token:", tokenResponse.access_token);
-
-                try {
-                  setLoading(true);
-                  // send token to backend for verification
-                  const res = await API.post("/auth/google/", {
-                    access_token: tokenResponse.access_token // Sent as access_token since we acquired an access token
-                  });
-
-                  console.log(res, 'backend response');
-
-                  const data = res.data;
-                  if (data) {
-                    // Normalize response handling to match AuthForm
-                    const accessToken = data.access || data.key || data.token || data.jwt;
-                    const refreshToken = data.refresh;
-                    const userData = data.user;
-
-                    if (accessToken) {
-                      localStorage.setItem("accessToken", accessToken);
-                      if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
-                      if (userData) localStorage.setItem("user", JSON.stringify(userData));
-
-                      window.location.href = "/";
-                    } else {
-                      setError("Login successful but no access token received.");
-                    }
-                  }
-                } catch (apiErr: any) {
-                  console.error("Backend auth error:", apiErr);
-                  setError(apiErr.response?.data?.message || "Google Login failed on server.");
-                } finally {
-                  setLoading(false);
-                }
-              },
-            });
-            setClient(oauthClient);
-          } catch (err) {
-            console.error("Google init error:", err);
-            setError("Google SDK initialization failed");
-          }
-        }
+        initializeGoogle();
       };
 
       document.body.appendChild(script);
     };
 
+    const initializeGoogle = () => {
+      if (!window.google?.accounts?.id) {
+        return;
+      }
+      if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+        setError("Google Client ID is missing.");
+        return;
+      }
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+          callback: handleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+
+        const buttonDiv = document.getElementById("google-sign-in-button");
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(buttonDiv, {
+            theme: "outline",
+            size: "large",
+            width: "100%"
+          });
+        }
+      } catch (err) {
+        console.error("Google Init Error:", err);
+      }
+    };
+
     loadGoogleScript();
   }, []);
 
-  const handleLoginClick = () => {
-    setError("");
-    if (!client) {
-      setError("Google client not ready");
-      return;
-    }
-
+  const handleCredentialResponse = async (response: any) => {
     setLoading(true);
+    setError("");
+
     try {
-      client.requestAccessToken(); // <-- opens the account picker popup
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("Login failed");
+      const res = await API.post("/auth/google/", {
+        id_token: response.credential
+      });
+
+      const data = res.data;
+      if (data) {
+        const accessToken = data.access || data.key || data.token || data.jwt;
+        const refreshToken = data.refresh;
+        const userData = data.user;
+
+        if (accessToken) {
+          localStorage.setItem("accessToken", accessToken);
+          if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+          if (userData) localStorage.setItem("user", JSON.stringify(userData));
+
+          window.location.href = "/";
+        } else {
+          setError("Login successful but no access token received.");
+        }
+      }
+    } catch (apiErr: any) {
+      console.error("Backend auth error:", apiErr);
+      const errorData = apiErr.response?.data;
+      const errorMessage = errorData?.message ||
+        (typeof errorData === 'object' ? JSON.stringify(errorData) : String(errorData)) ||
+        "Google Login failed on server.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      {/* Custom SVG Google Button */}
+    <div className="relative w-full">
+      {/* 
+        This is the "trick":
+        1. Render the Google Button (opacity 0) absolutely positioned over the container.
+        2. Render the Custom Button (visible) below it.
+        When user clicks, they are actually clicking the Google Button iframe.
+      */}
+      <div
+        id="google-sign-in-button"
+        className="absolute inset-0 z-50"
+        style={{ height: "100%", opacity: 0.01, cursor: "pointer" }}
+      ></div>
+
+      {/* Visual Custom Button (Not clickable directly, just for looks) */}
       <button
         type="button"
-        onClick={handleLoginClick}
-        disabled={loading}
-        className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition"
+        className="flex items-center justify-center gap-2 w-full border border-gray-300 rounded-lg py-2 hover:bg-gray-50 transition pointer-events-none"
       >
-        {/* Your original Google SVG */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 48 48"
@@ -147,7 +151,7 @@ export default function GoogleLoginButton() {
         </span>
       </button>
 
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p className="text-red-500 text-sm mt-2 text-center break-words">{error}</p>}
     </div>
   );
 }

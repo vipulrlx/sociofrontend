@@ -6,15 +6,18 @@ import { usePathname, useRouter } from "next/navigation";
 const PUBLIC_ROUTES = ["/auth"]; // pages that don’t need login
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  // TEMPORARY BYPASS: Directly return children to disable auth protection
-  return <>{children}</>;
-
-  /*
   const router = useRouter();
   const pathname = usePathname();
   const [checking, setChecking] = useState(true); // loading state
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     const token = localStorage.getItem("accessToken");
 
     if (!token && !PUBLIC_ROUTES.includes(pathname)) {
@@ -24,7 +27,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     } else {
       setChecking(false); // safe to render children
     }
-  }, [pathname, router]);
+  }, [pathname, router, mounted]);
+
+  // Prevent hydration mismatch by not rendering anything until mounted
+  if (!mounted) return null;
 
   if (checking) {
     // You can show a spinner or blank screen while checking auth
@@ -36,5 +42,4 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   return <>{children}</>;
-  */
 }
