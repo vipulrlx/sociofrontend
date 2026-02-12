@@ -72,7 +72,7 @@ export default function GoogleLoginButton() {
     setError("");
 
     try {
-      const res = await API.post("/auth/google/", {
+      const res = await API.post("auth/google/", {
         id_token: response.credential
       });
 

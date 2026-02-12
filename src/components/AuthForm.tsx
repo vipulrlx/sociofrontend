@@ -4,7 +4,7 @@ import { Phone, Lock, Mail, KeyRound, User } from "lucide-react";
 import { useState } from "react";
 import API from "@/lib/axios"; // axios instance
 import GoogleLoginButton from "./googleAuthBtn/GoogleLoginButton";
-import ForgotPasswordForm from "./forgotPassword/ForgotPasswordForm";
+// ForgotPassword component is hidden to follow strictly given docs
 
 const brandName = process.env.NEXT_PUBLIC_BRAND_NAME || "Default Brand";
 const brandLogo = process.env.NEXT_PUBLIC_BRAND_LOGO || "/next.svg";
@@ -30,6 +30,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
   // Signup states
   const [name, setName] = useState("");
   const [signupContactNumber, setSignupContactNumber] = useState("");
+  const [category, setCategory] = useState("student");
   const [countryCode, setCountryCode] = useState("+91");
 
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,18 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
       setError("");
 
       try {
-        const { data } = await API.post("/auth/login/", { email, password });
+        const { data } = await API.post("auth/login/", { email, password });
         if (!data.success) throw new Error(data.message || "Login failed");
 
         localStorage.setItem("accessToken", data.access);
         localStorage.setItem("refreshToken", data.refresh);
         localStorage.setItem("user", JSON.stringify(data.user));
-        window.location.href = "/";
+
+        if (data.user?.initialsetup === "1") {
+          window.location.href = "/brand-onboarding";
+        } else {
+          window.location.href = "/";
+        }
       } catch (err: any) {
         setError(err.response?.data?.message || err.message || "Login failed");
       } finally {
@@ -63,7 +69,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
     setLoading(true);
     setError("");
     try {
-      const { data } = await API.post("/auth/sendotp/", {
+      const { data } = await API.post("auth/sendotp/", {
         contactnumber: contactNumber,
       });
 
@@ -85,7 +91,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
     setLoading(true);
     setError("");
     try {
-      const { data } = await API.post("/auth/loginviaotp/", {
+      const { data } = await API.post("auth/loginviaotp/", {
+        contact_number: contactNumber,
         username,
         otp,
       });
@@ -95,7 +102,12 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
       localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
+
+      if (data.user?.initialsetup === "1") {
+        window.location.href = "/brand-onboarding";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err: any) {
       setError(
         err.response?.data?.message || err.message || "OTP verification failed"
@@ -111,7 +123,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
     setLoading(true);
     setError("");
     try {
-      const { data } = await API.post("/auth/register/", {
+      const { data } = await API.post("auth/register/", {
+        category,
         name,
         email,
         password,
@@ -124,9 +137,32 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
       localStorage.setItem("accessToken", data.access);
       localStorage.setItem("refreshToken", data.refresh);
       localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/";
+
+      if (data.user?.initialsetup === "1") {
+        window.location.href = "/brand-onboarding";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "Signup failed");
+      const errorData = err.response?.data;
+      let errorMessage = "Signup failed";
+
+      if (errorData) {
+        if (typeof errorData === "string") {
+          errorMessage = errorData;
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        } else if (typeof errorData === "object") {
+          // Handle DRF validation errors like {"email": ["already exists"]}
+          errorMessage = Object.entries(errorData)
+            .map(([field, msgs]: [string, any]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`)
+            .join(" | ");
+        }
+      } else {
+        errorMessage = err.message || "Signup failed";
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -156,11 +192,10 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
         <div className="px-6">
           <div className="relative flex bg-gray-100 rounded-lg p-1">
             <span
-              className={`absolute top-1 bottom-1 w-[calc(50%-0.5rem)] bg-white rounded-md shadow-sm transition-transform duration-300 ease-in-out ${
-                activeMethod === "magic"
-                  ? "translate-x-0"
-                  : "translate-x-[calc(100%+0.5rem)]"
-              }`}
+              className={`absolute top-1 bottom-1 w-[calc(50%-0.5rem)] bg-white rounded-md shadow-sm transition-transform duration-300 ease-in-out ${activeMethod === "magic"
+                ? "translate-x-0"
+                : "translate-x-[calc(100%+0.5rem)]"
+                }`}
             />
 
             <button
@@ -170,9 +205,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 setOtpSent(false);
                 setOtp("");
               }}
-              className={`relative z-10 flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeMethod === "magic" ? "text-gray-900" : "text-gray-600"
-              }`}
+              className={`relative z-10 flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeMethod === "magic" ? "text-gray-900" : "text-gray-600"
+                }`}
             >
               OTP
             </button>
@@ -180,9 +214,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
             <button
               type="button"
               onClick={() => setActiveMethod("password")}
-              className={`relative z-10 flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                activeMethod === "password" ? "text-gray-900" : "text-gray-600"
-              }`}
+              className={`relative z-10 flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${activeMethod === "password" ? "text-gray-900" : "text-gray-600"
+                }`}
             >
               Password
             </button>
@@ -196,10 +229,93 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
         onSubmit={isLogin ? handleLogin : handleRegister}
       >
         <div className="space-y-4">
-          {/* SIGNUP INPUTS */}
-          {!isLogin && (
+          {isLogin ? (
             <>
-              {/* Name */}
+              {activeMethod === "password" ? (
+                <>
+                  {/* Login Fields */}
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail size={18} className="text-gray-400" />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="Email Address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock size={18} className="text-gray-400" />
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* OTP Method */}
+                  {!otpSent ? (
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Phone size={18} className="text-gray-400" />
+                      </div>
+                      <input
+                        type="tel"
+                        placeholder="Enter phone number"
+                        value={contactNumber}
+                        onChange={(e) => setContactNumber(e.target.value)}
+                        required
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <KeyRound size={18} className="text-gray-400" />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Enter OTP"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        required
+                        className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Signup Fields (Strictly 7 fields) */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User size={18} className="text-gray-400" />
+                </div>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                >
+                  <option value="student">Student</option>
+                  <option value="professional">Professional</option>
+                  <option value="business">Business</option>
+                  <option value="employee">Employee</option>
+                </select>
+              </div>
+
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User size={18} className="text-gray-400" />
@@ -214,14 +330,13 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 />
               </div>
 
-              {/* Email */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail size={18} className="text-gray-400" />
                 </div>
                 <input
                   type="email"
-                  placeholder="eion@spacex.com"
+                  placeholder="Email Address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -229,14 +344,14 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 />
               </div>
 
-              {/* Password */}
+
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock size={18} className="text-gray-400" />
                 </div>
                 <input
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -244,16 +359,32 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 />
               </div>
 
-              {/* Phone */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Phone size={18} className="text-gray-400" />
                 </div>
                 <input
                   type="tel"
-                  placeholder="Enter phone number"
+                  placeholder="Contact Number"
                   value={signupContactNumber}
                   onChange={(e) => setSignupContactNumber(e.target.value)}
+                  required
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-gray-400 pl-3 text-sm font-medium">+</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Country Code (e.g. 91)"
+                  value={countryCode.startsWith('+') ? countryCode.slice(1) : countryCode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setCountryCode('+' + val);
+                  }}
                   required
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -261,78 +392,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
             </>
           )}
 
-          {/* LOGIN (Password Method) */}
-          {isLogin && activeMethod === "password" && (
-            <>
-              {/* Email */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  placeholder="eion@spacex.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="input-place-size block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              {/* Password */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="block w-full pl-10 pr-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </>
-          )}
-
-          {/* LOGIN (OTP Method) */}
-          {isLogin && activeMethod === "magic" && (
-            <>
-              {!otpSent ? (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone size={18} className="text-gray-400" />
-                  </div>
-                  <input
-                    type="tel"
-                    placeholder="Enter phone number"
-                    value={contactNumber}
-                    onChange={(e) => setContactNumber(e.target.value)}
-                    required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              ) : (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <KeyRound size={18} className="text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Enter OTP"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              )}
-            </>
-          )}
-
-          {/* Error */}
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {/* Error Message */}
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
           {/* Submit buttons */}
           {isLogin && activeMethod === "magic" ? (
@@ -341,7 +402,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 type="button"
                 onClick={handleSendOtp}
                 disabled={loading}
-                className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors mt-4"
               >
                 {loading ? "Sending..." : "Send OTP"}
               </button>
@@ -350,7 +411,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 type="button"
                 onClick={handleVerifyOtp}
                 disabled={loading}
-                className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors"
+                className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors mt-4"
               >
                 {loading ? "Verifying..." : "Verify OTP"}
               </button>
@@ -359,12 +420,11 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
             <button
               type="submit"
               disabled={loading}
-              className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors"
+              className="btn-color w-full text-white py-2 px-4 rounded-lg font-medium transition-colors mt-4"
             >
               {loading ? "Loading..." : isLogin ? "Sign in" : "Sign up"}
             </button>
           )}
-          {/* <ForgotPasswordForm/> */}
         </div>
 
         {/* Divider */}
@@ -375,7 +435,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
         </div>
 
         {/* Google Sign In */}
-        <GoogleLoginButton/>
+        <GoogleLoginButton />
 
         {!isLogin && (
           <p className="text-sm text-gray-500 mt-6">

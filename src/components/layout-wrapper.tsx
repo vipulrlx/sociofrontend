@@ -11,10 +11,10 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Any routes under /auth should skip the dashboard layout
-  const isAuthPage = pathname?.startsWith("/auth");
+  // Any routes under /auth or /brand-onboarding should skip the dashboard layout
+  const isExcludedPage = pathname?.startsWith("/auth") || pathname?.startsWith("/brand-onboarding");
 
-  if (isAuthPage) {
+  if (isExcludedPage) {
     return <>
       {children}
     </>;

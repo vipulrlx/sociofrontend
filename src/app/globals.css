@@ -79,7 +79,7 @@
 
   --input-height-sm: calc(2.25rem * var(--mantine-scale));
   --mantine-color-custom-6: #2e2e2e;
-  --mantine-color-gray-3:#dee2e6;
+  --mantine-color-gray-3: #dee2e6;
   --mantine-scale: 1;
   --mantine-radius-default: calc(0.5rem * var(--mantine-scale));
   --mantine-font-size-sm: calc(0.875rem * var(--mantine-scale));
@@ -100,112 +100,158 @@
   --color-purple-opacity: #e566f626;
   --color-gray-opacity: #bfbfbf36;
   --dashboard-bg-content-area: #f0f0f0;
-  
-  
+
+
 }
+
 .text-primary {
   color: var(--color-text-primary);
 }
+
 .text-secondary {
   color: var(--color-text-secondary);
 }
-.text-success{
+
+.text-success {
   color: var(--color-success);
 }
-.text-info{
+
+.text-info {
   color: var(--color-primary);
 }
-.text-purple{
+
+.text-purple {
   color: var(--color-purple);
 }
+
 .bg-primary {
   background-color: var(--color-primary);
 }
+
 .bg-secondary {
   background-color: var(--color-text-secondary);
 }
+
 .bg-border {
   background-color: var(--color-border);
 }
+
 .border-primary {
   border-color: var(--color-primary);
 }
+
 .border-success {
   border-color: var(--color-success);
 }
+
 .border-warning {
   border-color: var(--color-warning);
 }
+
 .border-error {
   border-color: var(--color-error);
 }
+
 .border-border {
   border-color: var(--color-border);
 }
-.bg-success{
-background-color: var(--color-success);
+
+.bg-success {
+  background-color: var(--color-success);
 }
 
-.bg-stat-success{
- background-color: var(--color-success-opacity);
+.bg-stat-success {
+  background-color: var(--color-success-opacity);
 }
-.bg-stat-info{
- background-color: var(--color-info-opacity);
+
+.bg-stat-info {
+  background-color: var(--color-info-opacity);
 }
-.bg-state-purple{
+
+.bg-state-purple {
   background-color: var(--color-purple-opacity);
 }
-.bg-state-gray{
+
+.bg-state-gray {
   background-color: var(--color-gray-opacity);
 }
-.bg-main-content{
+
+.bg-main-content {
   background-color: var(--dashboard-bg-content-area);
 }
-.util-bg-dots{
-    background-image: radial-gradient(var(--mantine-color-gray-3) 1px,transparent 1px)!important;
-    background-size: 16px 16px!important;
-    background-color: #f9fafb;
+
+.util-bg-dots {
+  background-image: radial-gradient(var(--mantine-color-gray-3) 1px, transparent 1px) !important;
+  background-size: 16px 16px !important;
+  background-color: #f9fafb;
 }
-.ocaya{
-    border: calc(.0625rem * var(--mantine-scale)) solid var(--mantine-color-gray-3);
-    --paper-radius: var(--mantine-radius-default);
-    outline: 0;
-    -webkit-tap-highlight-color: transparent;
-    display: block;
-    touch-action: manipulation;
-    text-decoration: none;
-    border-radius: var(--paper-radius);
-    box-shadow: var(--paper-shadow);
-    background-color: #fff;
+
+.ocaya {
+  border: calc(.0625rem * var(--mantine-scale)) solid var(--mantine-color-gray-3);
+  --paper-radius: var(--mantine-radius-default);
+  outline: 0;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  touch-action: manipulation;
+  text-decoration: none;
+  border-radius: var(--paper-radius);
+  box-shadow: var(--paper-shadow);
+  background-color: #fff;
 }
-.text-dimmed{
-  color:#868e96;
+
+.text-dimmed {
+  color: #868e96;
   font-size: var(--mantine-font-size-sm);
 }
-.link-login-signup{
+
+.link-login-signup {
   font-size: var(--mantine-font-size-sm);
-  color:#2e2e2e;
+  color: #2e2e2e;
   cursor: pointer;
 }
-.txt-feature-size{
+
+.txt-feature-size {
   font-size: var(--mantine-font-size-sm);
 }
-.btn-color{
+
+.btn-color {
   background: var(--mantine-color-custom-6);
-  font-size: var(--button-fz,var(--mantine-font-size-sm));
+  font-size: var(--button-fz, var(--mantine-font-size-sm));
 }
-.btn-color-google{
-  font-size: var(--button-fz,var(--mantine-font-size-sm));
+
+.btn-color-google {
+  font-size: var(--button-fz, var(--mantine-font-size-sm));
 }
-.input-place-size{
-  font-size: var(--input-fz,var(--input-fz,var(--mantine-font-size-sm)));
+
+.input-place-size {
+  font-size: var(--input-fz, var(--input-fz, var(--mantine-font-size-sm)));
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
   }
 }

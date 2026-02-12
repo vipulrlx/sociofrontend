@@ -38,12 +38,18 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
 
   const handleLogout = async () => {
     try {
-      await API.post("/auth/logout/");
+      if (typeof window !== "undefined") {
+        const refreshToken = window.localStorage.getItem("refreshToken");
+        await API.post("/auth/logout/", {
+          refresh_token: refreshToken,
+        });
+      }
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
       if (typeof window !== "undefined") {
         window.localStorage.removeItem("accessToken");
+        window.localStorage.removeItem("refreshToken");
         window.localStorage.removeItem("user");
       }
       router.push("/auth");

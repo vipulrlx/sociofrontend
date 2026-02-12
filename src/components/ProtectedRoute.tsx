@@ -19,13 +19,48 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     if (!mounted) return;
 
     const token = localStorage.getItem("accessToken");
+    const userStr = localStorage.getItem("user");
+    let initialSetup = "0";
 
-    if (!token && !PUBLIC_ROUTES.includes(pathname)) {
-      router.replace("/auth"); // replace avoids back button flicker
-    } else if (token && PUBLIC_ROUTES.includes(pathname)) {
-      router.replace("/"); // already logged in, push to dashboard
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        // Default to "0" if missing, meaning assumed complete or not required unless explicitly "1"
+        initialSetup = user.initialsetup ? String(user.initialsetup) : "0";
+      } catch (e) {
+        console.error("Error parsing user data");
+      }
+    }
+
+    if (!token) {
+      // Not logged in
+      if (!PUBLIC_ROUTES.includes(pathname)) {
+        router.replace("/auth");
+      } else {
+        setChecking(false);
+      }
     } else {
-      setChecking(false); // safe to render children
+      // Logged in
+      if (initialSetup === "1") {
+        // Must complete onboarding
+        if (pathname !== "/brand-onboarding") {
+          router.replace("/brand-onboarding");
+        } else {
+          setChecking(false);
+        }
+      } else {
+        // Onboarding complete (initialSetup is "0", "2", etc.)
+        if (pathname === "/brand-onboarding") {
+          // Prevent re-entry to onboarding
+          router.replace("/");
+        } else if (PUBLIC_ROUTES.includes(pathname)) {
+          // If on auth page but logged in, go home
+          router.replace("/");
+        } else {
+          // Allowed access to protected pages
+          setChecking(false);
+        }
+      }
     }
   }, [pathname, router, mounted]);
 
