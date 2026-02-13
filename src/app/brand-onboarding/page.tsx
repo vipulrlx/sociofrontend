@@ -2,6 +2,7 @@
 
 import AIOnboarding from "@/components/business/AIOnboarding";
 import { useRouter } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 import { BusinessFormData } from "@/components/business/WizardSteps";
 
@@ -14,5 +15,9 @@ export default function BrandOnboardingPage() {
         router.push('/business');
     };
 
-    return <AIOnboarding onComplete={handleComplete} />;
+    return (
+        <ProtectedRoute>
+            <AIOnboarding onComplete={handleComplete} />
+        </ProtectedRoute>
+    );
 }

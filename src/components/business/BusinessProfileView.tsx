@@ -2,7 +2,7 @@ import { BusinessFormData } from "./WizardSteps";
 import { Building2, Target, DollarSign, Users, Pencil, Globe, Wallet } from "lucide-react";
 
 interface BusinessProfileViewProps {
-    data: BusinessFormData;
+    data: any; // Using any to accommodate the rich API structure
     onEdit: () => void;
 }
 
@@ -42,95 +42,90 @@ export default function BusinessProfileView({ data, onEdit }: BusinessProfileVie
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    {/* Offer Details */}
-                    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
+                    {/* Brand Core */}
+                    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 md:col-span-2">
                         <div className="flex items-center gap-3 mb-4 md:mb-6">
                             <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
                                 <Target size={20} />
                             </div>
-                            <h2 className="text-lg font-bold text-gray-900">Offer & USP</h2>
+                            <h2 className="text-lg font-bold text-gray-900">Brand Identity</h2>
                         </div>
 
-                        <div className="space-y-4 md:space-y-6">
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-500 mb-2">Industry</h3>
+                                    <p className="text-gray-800 font-medium">{data.industry || "Not specified"}</p>
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-500 mb-2">Tone of Voice</h3>
+                                    <p className="text-gray-800 font-medium">{data.brand_tone || "Not specified"}</p>
+                                </div>
+                            </div>
+
                             <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-2">Product/Service</h3>
+                                <h3 className="text-sm font-medium text-gray-500 mb-2">Brand Summary</h3>
                                 <p className="text-gray-800 leading-relaxed text-sm md:text-base">{data.description}</p>
                             </div>
                             <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-2">Unique Selling Proposition</h3>
+                                <h3 className="text-sm font-medium text-gray-500 mb-2">Value Proposition</h3>
                                 <p className="text-gray-800 leading-relaxed text-sm md:text-base">{data.usp}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Deal & Budget */}
+                    {/* Content Strategy */}
+                    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
+                        <div className="flex items-center gap-3 mb-4 md:mb-6">
+                            <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                                <Pencil size={20} />
+                            </div>
+                            <h2 className="text-lg font-bold text-gray-900">Content Pillars</h2>
+                        </div>
+
+                        <ul className="space-y-3">
+                            {data.content_pillars && data.content_pillars.length > 0 ? (
+                                data.content_pillars.map((pillar: string, idx: number) => (
+                                    <li key={idx} className="flex gap-3 text-sm md:text-base text-gray-700">
+                                        <span className="text-purple-500 font-bold">•</span>
+                                        {pillar}
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="text-gray-400 italic">No content pillars defined</li>
+                            )}
+                        </ul>
+                    </div>
+
+                    {/* Audience Insights */}
                     <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6">
                         <div className="flex items-center gap-3 mb-4 md:mb-6">
                             <div className="p-2 bg-green-50 rounded-lg text-green-600">
-                                <DollarSign size={20} />
-                            </div>
-                            <h2 className="text-lg font-bold text-gray-900">Market & Finance</h2>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 md:gap-6">
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-1">Avg. Deal Size</h3>
-                                <p className="text-lg md:text-xl font-bold text-gray-900 break-all">${Number(data.averageDealSize).toLocaleString()}</p>
-                                <span className="inline-block mt-1 px-2.5 py-1 bg-gray-100 text-gray-600 text-xs rounded-full font-medium capitalize">
-                                    {data.dealSizeTier.replace('k', 'K')} Tier
-                                </span>
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-1">Monthly Budget</h3>
-                                <p className="text-lg md:text-xl font-bold text-gray-900">{data.monthlyBudget || "Not specified"}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Additional Info */}
-                    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 md:col-span-2">
-                        <div className="flex items-center gap-3 mb-4 md:mb-6">
-                            <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
                                 <Users size={20} />
                             </div>
-                            <h2 className="text-lg font-bold text-gray-900">Targeting & Operations</h2>
+                            <h2 className="text-lg font-bold text-gray-900">Audience Insights</h2>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                        <div className="space-y-6">
                             <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-3">Target Regions</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {data.targetRegions.length > 0 ? (
-                                        data.targetRegions.map(region => (
-                                            <span key={region} className="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-lg border border-gray-100">
-                                                {region}
-                                            </span>
+                                <h3 className="text-sm font-medium text-gray-500 mb-2">Target Audience</h3>
+                                <p className="text-gray-800 text-sm leading-relaxed">{data.target_audience || "Not specified"}</p>
+                            </div>
+
+                            <div>
+                                <h3 className="text-sm font-medium text-gray-500 mb-3">Pain Points</h3>
+                                <ul className="space-y-2">
+                                    {data.audience_pain_points && data.audience_pain_points.length > 0 ? (
+                                        data.audience_pain_points.map((point: string, idx: number) => (
+                                            <li key={idx} className="flex gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded-lg">
+                                                <span className="text-red-400 min-w-[4px] mt-1">•</span>
+                                                {point}
+                                            </li>
                                         ))
                                     ) : (
-                                        <span className="text-gray-400 italic">No regions selected</span>
+                                        <li className="text-gray-400 italic">No pain points identified</li>
                                     )}
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-3">GTM Channels</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {data.gtmChannels.length > 0 ? (
-                                        data.gtmChannels.map(channel => (
-                                            <span key={channel} className="px-3 py-1 bg-gray-50 text-gray-700 text-sm rounded-lg border border-gray-100">
-                                                {channel}
-                                            </span>
-                                        ))
-                                    ) : (
-                                        <span className="text-gray-400 italic">No channels selected</span>
-                                    )}
-                                </div>
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-2">Team Size</h3>
-                                <p className="text-gray-900 font-medium flex items-center gap-2">
-                                    <Users size={16} className="text-gray-400" />
-                                    {data.teamSize || "Not specified"}
-                                </p>
+                                </ul>
                             </div>
                         </div>
                     </div>

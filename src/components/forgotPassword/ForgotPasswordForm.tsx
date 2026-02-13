@@ -22,7 +22,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
     setError("");
     setSuccess("");
     try {
-      const { data } = await API.post("/auth/forgot-password/", { email });
+      const { data } = await API.post("auth/forgot-password/", { email });
       if (!data.success) throw new Error(data.message || "Failed to send OTP");
 
       setOtpSent(true);
@@ -40,13 +40,26 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
     setError("");
     setSuccess("");
     try {
-      const { data } = await API.post("/auth/verify-forgot-otp/", { email, otp });
+      const { data } = await API.post("auth/verify-forgot-otp/", { email, otp });
       if (!data.success) throw new Error(data.message || "OTP verification failed");
 
       setSuccess("OTP verified successfully. You can now reset your password.");
       // you may redirect to reset-password page here
     } catch (err: any) {
-      setError(err.response?.data?.message || err.message || "OTP verification failed");
+      const errorData = err.response?.data;
+      let errorMessage = "OTP verification failed";
+      if (errorData) {
+        if (typeof errorData === "object") {
+          errorMessage = Object.entries(errorData)
+            .map(([field, msgs]: [string, any]) => `${field}: ${Array.isArray(msgs) ? msgs.join(", ") : msgs}`)
+            .join(" | ");
+        } else {
+          errorMessage = String(errorData);
+        }
+      } else {
+        errorMessage = err.message || "OTP verification failed";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
