@@ -6,6 +6,7 @@ import BusinessIllustration from "@/components/illustrations/BusinessIllustratio
 import ProductIllustration from "@/components/illustrations/ProductIllustration";
 import SocialsIllustration from "@/components/illustrations/SocialsIllustration";
 import PlannerIllustration from "@/components/illustrations/PlannerIllustration";
+import ContentCreationGrid from "@/components/dashboard/ContentCreationGrid";
 
 export default function DashboardPage() {
   const [userName, setUserName] = useState("User");
@@ -47,7 +48,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="px-8 py-10 max-w-7xl mx-auto h-full flex flex-col min-w-0 overflow-hidden">
+    <div className="px-8 py-10 max-w-7xl mx-auto flex flex-col min-w-0">
       {/* Header Section */}
       <div className="mb-12 flex-shrink-0">
         <p className="text-gray-500 font-medium mb-1">My Workspace</p>
@@ -74,6 +75,8 @@ export default function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      <ContentCreationGrid />
     </div>
   );
 }
