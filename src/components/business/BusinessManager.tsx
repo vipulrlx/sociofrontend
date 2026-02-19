@@ -51,8 +51,15 @@ export default function BusinessManager() {
                     setProfileData(mappedData);
                     setViewMode('view');
                 }
-            } catch (error) {
-                console.error("Failed to fetch brand details", error);
+            } catch (error: any) {
+                // If 404, it might mean the brand hasn't been created on the backend yet.
+                // We'll fall back to local storage without shouting in the console.
+                if (error.response && error.response.status === 404) {
+                    console.warn("Brand details not found on server (404), using local fallback.");
+                } else {
+                    console.error("Failed to fetch brand details", error);
+                }
+
                 // Fallback to local storage if API fails, just in case
                 const savedData = localStorage.getItem('business_profile');
                 if (savedData) {

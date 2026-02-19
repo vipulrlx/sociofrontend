@@ -30,11 +30,28 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
   // Signup states
   const [name, setName] = useState("");
   const [signupContactNumber, setSignupContactNumber] = useState("");
-  const [category, setCategory] = useState("student");
-  const [countryCode, setCountryCode] = useState("+91");
+  // const [category, setCategory] = useState("student"); // Removed: Defaulting to "employee"
+  // const [countryCode, setCountryCode] = useState("+91"); // Removed: Defaulting to "+91"
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Clear state when switching modes
+  const handleModeSwitch = (mode: boolean) => {
+    setIsLogin(mode);
+    setError("");
+    setLoading(false);
+    // Login
+    setEmail("");
+    setPassword("");
+    setContactNumber("");
+    setOtp("");
+    setOtpSent(false);
+    setActiveMethod("magic");
+    // Signup
+    setName("");
+    setSignupContactNumber("");
+  };
 
   // Password Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -124,12 +141,12 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
     setError("");
     try {
       const { data } = await API.post("auth/register/", {
-        category,
+        category: "employee", // Hardcoded as per request
         name,
         email,
         password,
         contact_number: signupContactNumber,
-        country_code: countryCode,
+        country_code: "+91", // Defaulted as per request
       });
 
       if (!data.success) throw new Error(data.message || "Signup failed");
@@ -179,7 +196,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
         <p className="text-dimmed">
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <a
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => handleModeSwitch(!isLogin)}
             className="link-login-signup font-medium hover:underline cursor-pointer"
           >
             {isLogin ? "Sign up" : "Login"}
@@ -299,22 +316,8 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
             </>
           ) : (
             <>
-              {/* Signup Fields (Strictly 7 fields) */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-gray-400" />
-                </div>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                >
-                  <option value="student">Student</option>
-                  <option value="professional">Professional</option>
-                  <option value="business">Business</option>
-                  <option value="employee">Employee</option>
-                </select>
-              </div>
+              {/* Signup Fields (Strictly minimized) */}
+              {/* Removed Category Dropdown - Defaulting to "employee" silently */}
 
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -373,22 +376,7 @@ export default function AuthForm({ isLogin, setIsLogin }: AuthFormProps) {
                 />
               </div>
 
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-400 pl-3 text-sm font-medium">+</span>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Country Code (e.g. 91)"
-                  value={countryCode.startsWith('+') ? countryCode.slice(1) : countryCode}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    setCountryCode('+' + val);
-                  }}
-                  required
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+              {/* Removed Duplicate Country Code Field - Defaulting to "+91" silently */}
             </>
           )}
 

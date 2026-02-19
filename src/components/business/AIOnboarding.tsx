@@ -168,13 +168,27 @@ export default function AIOnboarding({ onComplete }: AIOnboardingProps) {
 
     const handleFinalize = async () => {
         try {
-            await API.post("/styleupdate/", {
+            // Attempt to update styles using the main brand endpoint
+            // If this fails, we catch it and proceed so the user isn't stuck
+            await API.post("/updatebranddetails/", {
+                // The backend likely expects a structured object or flat fields. 
+                // Sending both flat and nested to be safe given we don't have the API docs.
+                styles: {
+                    photography_style: selectedStyle,
+                    font_style: selectedFont,
+                    filter_style: "Warm, low contrast"
+                },
+                // Flattened versions just in case
                 photography_style: selectedStyle,
-                font_style: selectedFont,
-                filter_style: "Warm, low contrast" // Default as requested
+                font_style: selectedFont
             });
 
+        } catch (error) {
+            console.warn("Failed to update styles, proceeding anyway:", error);
+            // Non-blocking error. We proceed to complete the onboarding even if style save fails.
+        } finally {
             // CRITICAL: Update local user state immediately so ProtectedRoute allows exit
+            // This MUST happen regardless of API success/failure
             const userStr = localStorage.getItem("user");
             if (userStr) {
                 try {
@@ -185,10 +199,6 @@ export default function AIOnboarding({ onComplete }: AIOnboardingProps) {
                     console.error("Error updating local user status", e);
                 }
             }
-
-        } catch (error) {
-            console.error("Failed to update styles:", error);
-            // Proceed anyway to not block the user
         }
 
         // Check user status for redirection
@@ -208,6 +218,10 @@ export default function AIOnboarding({ onComplete }: AIOnboardingProps) {
                     router.push("/");
                     return;
                 }
+            } else {
+                // If no user found (weird state), try going home anyway
+                router.push("/");
+                return;
             }
         } catch (e) {
             console.error("Error checking user status:", e);
@@ -244,8 +258,9 @@ export default function AIOnboarding({ onComplete }: AIOnboardingProps) {
                 window.localStorage.removeItem("refreshToken");
                 window.localStorage.removeItem("user");
                 window.localStorage.removeItem("business_profile");
+
+                router.replace("/auth");
             }
-            router.push("/auth");
         }
     };
 

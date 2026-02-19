@@ -40,19 +40,25 @@ export default function Header({ onToggleSidebar }: HeaderProps) {
     try {
       if (typeof window !== "undefined") {
         const refreshToken = window.localStorage.getItem("refreshToken");
-        await API.post("/auth/logout/", {
-          refresh_token: refreshToken,
-        });
+        if (refreshToken) {
+          await API.post("/auth/logout/", {
+            refresh_token: refreshToken,
+          });
+        }
       }
     } catch (error) {
       console.error("Logout failed:", error);
     } finally {
       if (typeof window !== "undefined") {
+        // Clear all auth related items
         window.localStorage.removeItem("accessToken");
         window.localStorage.removeItem("refreshToken");
         window.localStorage.removeItem("user");
+        window.localStorage.removeItem("business_profile");
+
+        // Use replace to prevent back button from working
+        router.replace("/auth");
       }
-      router.push("/auth");
     }
   };
 
