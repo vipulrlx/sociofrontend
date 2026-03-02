@@ -3,8 +3,8 @@ import LayoutWrapper from "@/components/layout-wrapper";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 export const metadata = {
-  title: "Ocoya Dashboard",
-  description: "Social Media Dashboard built with Next.js + Tailwind",
+  title: "RealiSocial.ai",
+  description: "AI Based Digital Marketing Tool",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

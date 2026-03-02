@@ -70,17 +70,6 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                 Home
               </Link>
               <Link
-                href="/dashboard"
-                onClick={onClose}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${pathname === "/dashboard"
-                  ? "text-success bg-success/10"
-                  : "text-secondary hover:text-primary hover:bg-gray-100"
-                  }`}
-              >
-                <LayoutDashboard size={18} />
-                Dashboard
-              </Link>
-              <Link
                 href="/brand-onboarding"
                 onClick={onClose}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${pathname === "/brand-onboarding"
