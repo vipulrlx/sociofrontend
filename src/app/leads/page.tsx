@@ -1,9 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import LeadsList from "@/components/leads/LeadsList";
+import AddLeadModal from "@/components/leads/AddLeadModal";
 import { Plus, Upload } from "lucide-react";
 
 export default function LeadsPage() {
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+    const handleLeadAdded = () => {
+        setRefreshTrigger(prev => prev + 1);
+    };
+
     return (
         <div className="p-8 max-w-7xl mx-auto">
             {/* Header Actions */}
@@ -12,7 +21,10 @@ export default function LeadsPage() {
                     <Upload size={16} />
                     Import Leads
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium text-sm rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
+                <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 font-medium text-sm rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+                >
                     <Plus size={16} />
                     Add New Lead
                 </button>
@@ -22,7 +34,13 @@ export default function LeadsPage() {
                 <h1 className="text-lg font-bold text-gray-800 mb-1">Leads List</h1>
             </div>
 
-            <LeadsList />
+            <LeadsList key={refreshTrigger} />
+
+            <AddLeadModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                onLeadAdded={handleLeadAdded}
+            />
         </div>
     );
 }
